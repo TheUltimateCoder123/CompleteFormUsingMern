@@ -40,12 +40,31 @@ app.post('/register', async (req, res) => {
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
     })
+
+    /**Hashing is Done Here That is above save method. It is written on register.js as we call .pre Method */
+
     const registered = await registerEmployee.save()
     res.render('index')
   } else {
     res.send('Password Donot Match')
   }
 })
+app.post('/login', async (req, res) => {
+  try {
+    const email = req.body.Email
+    const password = req.body.password
+    const userDetails = await Register.findOne({ email: email })
+    console.log(userDetails)
+    if (userDetails.password === password) {
+      res.status(201).render('index')
+    } else {
+      res.send('Invalid Login Credentials')
+    }
+  } catch (error) {
+    res.status(400).send(error)
+  }
+})
+
 app.listen(port, () => {
   console.log(`Listening to port${port}`)
 })
