@@ -5,16 +5,17 @@ const path = require('path')
 const hbs = require('hbs')
 const Register = require('./models/registers')
 const { ppid } = require('process')
+const bcrypt = require('bcryptjs')
 
 const static_path = path.join(__dirname, '../public')
 const template_path = path.join(__dirname, '../templates/views')
 const partials_path = path.join(__dirname, '../templates/partials')
 app.use(express.static(static_path))
+require('./db/conn')
 app.use(express.json())
 /*The Above Line  Work through Post man but you have to use line below to work without post man*/
 app.use(express.urlencoded({ extended: false }))
 
-require('./db/conn')
 app.set('view engine', 'hbs')
 app.set('views', template_path)
 hbs.registerPartials(partials_path)
@@ -54,8 +55,9 @@ app.post('/login', async (req, res) => {
     const email = req.body.Email
     const password = req.body.password
     const userDetails = await Register.findOne({ email: email })
-    console.log(userDetails)
-    if (userDetails.password === password) {
+    const isMatch = await bcrypt.compare(password, userDetails.password)
+
+    if (isMatch) {
       res.status(201).render('index')
     } else {
       res.send('Invalid Login Credentials')
